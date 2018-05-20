@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     }
     // variables
     int lineCount, i = 0, src;
-    char count[MAX] = "", source[MAX] = "";
+    char count[25] = "", source[25] = "";
     ssize_t bytes_read;
     
     // get arguments from shell
