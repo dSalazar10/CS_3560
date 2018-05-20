@@ -1,28 +1,21 @@
-//
-//  ls.c
-//  programs
-//
-//  Created by DANIEL SALAZAR on 4/12/18.
-//
 
+// gcc queue_example.c -o queue_example
 
-#include <stdio.h>      /* printf, perror */
-#include <stdlib.h>     /* malloc, free, exit */
+#include <stdio.h>      /*  printf */
+#include <stdlib.h>     /* malloc, exit */
 #include <string.h>     /* strlen, strcmp, strcpy */
 #include <sys/queue.h>  /* tailq */
 #include <stdbool.h>    /* bool */
 #include <time.h>       /* ctime */
 #include <grp.h>        /* getgrgid */
-#include <sys/dir.h>    /* opendir, readdir, closedir, dirent */
-#include <errno.h>      /* errno */
-#include <sys/stat.h>   /* stat */
-#include <sys/ioctl.h>  /* ioctl, winsize, TIOCGWINSZ */
-#include <unistd.h>     /* getopt, getcwd, STDOUT_FILENO */
-#include <pwd.h>        /* getpwuid */
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+/* getpwuid */
+#include <sys/types.h>
+#include <pwd.h>
+#include <uuid/uuid.h>
 
-// Testing process info stuff
-// from  /usr/include
-#include <libproc.h>
 
 const int MAX = 1024;
 static int col_width = 0, col_height = 0;
@@ -251,118 +244,28 @@ static void print(list * head)
     }
     Print(head);
 }
-DIR* openDir(char path[])
-{
-    // opens the directory named by path, associates
-    // a directory stream with it
-    DIR *dirp;
-    if ((dirp = opendir(path)) == NULL) {
-        // The pointer NULL is returned if filename cannot
-        // be accessed, or if it cannot create enough
-        // memory to hold the whole thing, and sets the
-        // global variable errno to indicate the error.
-        perror("opendir");
-        return NULL;
-    }
-    // returns a pointer to be used to identify the directory stream
-    return dirp;
-}
-list contentsOfDir(char path[])
-{
-    //Performs a shallow search of the specified directory and returns the paths of any contained items.
-    DIR *dirp = openDir(path);
-    struct dirent *dp;
-    list head;
-    TAILQ_INIT(&head);
-    while((dp = readdir(dirp)) != NULL)
-    {
-        if((Aflag == true && (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)))
-            continue;
-        else if(aflag == false && *(dp->d_name) == '.')
-            if(Aflag == false)
-                continue;
-        
-        struct fileinfo *fileinfo = malloc(sizeof(struct fileinfo));
-        strcpy(fileinfo->name, dp->d_name);
-        
-        char source[MAX] = "";
-        strcpy(source, path);
-        strcat(source, "/");
-        strcat(source, dp->d_name);
-        stat(source, &(fileinfo->stat));
-        
-        AddEl(&head, fileinfo);
-    }
-    if (errno != 0)
-        perror("readdir");
-    closedir(dirp);
-    return head;
-}
-void procpid(pid_t pid)
-{
-    struct proc_bsdinfo proc;
-    int st = proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc, PROC_PIDTBSDINFO_SIZE);
-    printf("name: %s\n", proc.pbi_name);
-}
-void pidlist()
-{
-    int bufsize = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
-    pid_t pids[2 * bufsize / sizeof(pid_t)];
-    bufsize = proc_listpids(PROC_ALL_PIDS, 0, pids, sizeof(pids));
-    size_t num_pids = bufsize / sizeof(pid_t);
-    int i = 0;
-    while (i < num_pids)
-    {
-        printf("pid[%d]::%d\n", i, pids[i]);
-        procpid(pids[i]);
-        printf("\n-------------------------------\n\n");
-        i += 1;
-    }
-}
-void test()
-{
-    pidlist();
-}
-int main(int argc, char *argv[])
-{
-    
-    /*
-    int c;
-    char path[MAX];
-    while ((c = getopt(argc, argv, "ARalr1")) != -1)
-    {
-        switch (c)
-        {
-            case 'A': // almost-all
-                Aflag = true;
-                break;
-            case 'R': // recursive
-                Rflag = true;
-                break;
-            case 'a': // all
-                aflag = true;
-                break;
-            case 'l': // long
-                lflag = true;
-                break;
-            case 'r': // reverse
-                rflag = true;
-                break;
-            case '1': // one entry per line
-                numflag = true;
-                break;
-            default:
-                printf("usage: %s [-ABFGLRTabdhinqrsw1]\n", argv[0]);
-                break;
-        }
-    }
-    list head;
-    TAILQ_INIT(&head);
-    getcwd(path, sizeof(path));
-    head = contentsOfDir(path);
-    print(&head);
-    return 0;
-     */
-    test();
-}
 
+
+
+#if 0 // Set this to 1 to test
+int main (int arc, char * argv [])
+{
+    // declare the head
+    list head;
+    TAILQ_INIT(&head); // initialize the head
+    
+    // fill the queue with "Hello World\n"
+    AddEl(&head, "Hello ");
+    AddEl(&head, "World!");
+    
+    Print(&head);
+    
+    printf("\nRemoved %s\n",RemoveEl(&head, "Hello "));
+    Print(&head);
+    // free the queue
+    clear(&head);
+    Print(&head); // prints ""
+    
+    return EXIT_SUCCESS;
+}
+#endif

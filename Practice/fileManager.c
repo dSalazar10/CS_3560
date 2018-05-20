@@ -5,12 +5,17 @@
 //  Created by DANIEL SALAZAR on 4/12/18.
 //
 
+
 #include <stdio.h>
 #include <stdbool.h>    /* bool */
 #include <stdlib.h>     /* getenv */
 #include <sys/dir.h>    /* dirent */
 #include <errno.h>      /* perror */
 #include <string.h>     /* strcmp */
+#include "queue.h"      /* linkedlist */
+#include <sys/stat.h>   /* mkdir */
+#include <getopt.h>     /* getopt */
+#include <unistd.h>     /* getcwd */
 /* sysctl*/
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -18,51 +23,70 @@
 #include <pwd.h>
 #include <uuid/uuid.h>
 
-char* fileType(__uint8_t d_type)
-{
-    switch(d_type)
-    {
-        case 1: return "FIFO";
-        case 2: return "CHR";
-        case 4: return "DIR";
-        case 6: return "BLK";
-        case 8: return "REG";
-        case 10: return "LNK";
-        case 12: return "SOCK";
-        case 14: return "WHT";
-        default: return "UNKNOWN";
-    }
-}
-/* User info*/
-char* userName()
-{
-    //Returns the logon name of the current user.
-    return getenv("USER");
-}
+
 /* Discovering Directory Contents */
 char* tempDir()
 {
     //Returns the temporary directory for the current user.
-    return "/tmp";
+    return getenv("TMPDIR");
 }
 char* homeDir()
 {
     //Returns the home directory for the current user.
-    return NULL;
+    return getenv("HOME");
 }
-
-void contentsOfDir(char path[])
+DIR* openDir(char path[])
+{
+    // opens the directory named by path, associates
+    // a directory stream with it
+    DIR *dirp;
+    if ((dirp = opendir(path)) == NULL) {
+        // The pointer NULL is returned if filename cannot
+        // be accessed, or if it cannot create enough
+        // memory to hold the whole thing, and sets the
+        // global variable errno to indicate the error.
+        perror("opendir");
+        return NULL;
+    }
+    // returns a pointer to be used to identify the directory stream
+    return dirp;
+}
+list contentsOfDir(char path[])
 {
     //Performs a shallow search of the specified directory and returns the paths of any contained items.
-}
-char* pathsOfDir(char path[])
-{
-    //Returns the pathnames of all files and directories contained within that directory.
-    return NULL;
+    DIR *dirp = openDir(path);
+    struct dirent *dp;
+    list head;
+    TAILQ_INIT(&head);
+    while((dp = readdir(dirp)) != NULL)
+    {
+        if((Aflag == true && (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)))
+            continue;
+        else if(aflag == false && *(dp->d_name) == '.')
+            if(Aflag == false)
+                continue;
+        
+        struct fileinfo *fileinfo = malloc(sizeof(struct fileinfo));
+        strcpy(fileinfo->name, dp->d_name);
+        
+        char source[MAX] = "";
+        strcpy(source, path);
+        strcat(source, "/");
+        strcat(source, dp->d_name);
+        stat(source, &(fileinfo->stat));
+                
+        AddEl(&head, fileinfo);
+    }
+    if (errno != 0)
+        perror("readdir");
+    closedir(dirp);
+    return head;
 }
 char* subpathsOfDir(char path[])
 {
     //Returns an array of strings identifying the paths for all items in the specified directory.
+    // This method recurses the specified directory and its subdirectories. The method skips the
+    // “.” and “..” directories at each level of the recursion.
     return NULL;
 }
 
@@ -187,55 +211,53 @@ bool contentsEqual(char src[], char dst[])
 
 void test()
 {
-    char *arg = "test";
-    DIR *dirp;
-    if ((dirp = opendir(".")) == NULL) {
-        perror("couldn't open '.'");
-        return;
-    }
-    
-    struct dirent *dp;
-    do {
-        errno = 0;
-        if ((dp = readdir(dirp)) != NULL) {
-            if (strcmp(dp->d_name, arg) != 0)
-                continue;
-            
-            
-            printf("file number of entry: %llu\n", dp->d_fileno);
-            printf("seek offset: %lld\n", dp->d_seekoff);
-            printf("length of this record: %hu\n", dp->d_reclen);
-            printf("length of string in d_name: %hu\n", dp->d_namlen);
-            printf("file type: %s\n", fileType(dp->d_type));
-            printf("name: %s\n", dp->d_name);
-            
-            (void) closedir(dirp);
-            return;
-            
-            
-        }
-    } while (dp != NULL);
-    if (errno != 0)
-        perror("error reading directory");
-    else
-        (void) printf("failed to find %s\n", arg);
-    (void) closedir(dirp);
-    
-    
-    
     
 }
 
 int main(int argc, char *argv[])
 {
-    //test();
-    if(fileExists("../hw2"))
-        printf("exists");
+    int c;
+    char path[MAX];
+    while ((c = getopt(argc, argv, "ARalr1")) != -1)
+    {
+        switch (c)
+        {
+            case 'A': // almost-all
+                Aflag = true;
+                break;
+            case 'R': // recursive
+                Rflag = true;
+                break;
+            case 'a': // all
+                aflag = true;
+                break;
+            case 'l': // long
+                lflag = true;
+                break;
+            case 'r': // reverse
+                rflag = true;
+                break;
+            case '1': // one entry per line
+                numflag = true;
+                break;
+            default:
+                printf("usage: %s [-ABFGLRTabdhinqrsw1]\n", argv[0]);
+                break;
+        }
+    }
+    list head;
+    TAILQ_INIT(&head);
+    getcwd(path, sizeof(path));
+    head = contentsOfDir(path);
+    print(&head);
     return 0;
 }
 
 
-
+// directory operations
+// opendir(3), fdopendir(3), readdir(3), readdir_r(3),
+// telldir(3), seekdir(3), rewinddir(3), closedir(3),
+// dirfd(3)
 
 
 
