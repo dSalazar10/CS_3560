@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-const int MAX = 25;
 
 // load command line argument
 void loadOp(char source[], char target[])
@@ -55,7 +54,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        char operator[MAX] = "", op1[MAX] = "", op2[MAX] = "";
+        char operator[25] = "", op1[25] = "", op2[25] = "";
         float term1, term2;
         
         // extract command line arguments
