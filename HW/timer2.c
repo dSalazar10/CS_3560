@@ -44,6 +44,7 @@ void timer(int time)
     tcsetattr(fileno(stdin), TCSANOW, &newSettings);
     // install the signal
     signal(SIGINT, quit);
+    signal(SIGQUIT, quit);
     // while the user hasn't quit and
     // there is still time to count down from
     while(!e && time)
