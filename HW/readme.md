@@ -1,4 +1,5 @@
 These are the assignments from the class
+
 Ch 1: calc.c
 
 Ch 2: head.c
