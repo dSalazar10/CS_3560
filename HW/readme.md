@@ -6,7 +6,7 @@ Ch 2: head.c
 
 Ch 3: cm.c
 
-Ch 4: spwd.c
+Ch 4: rbi.c
 
 Ch 5: timer.c
 
