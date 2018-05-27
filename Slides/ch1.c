@@ -164,6 +164,6 @@ void Free(void *ptr)
 
 int main(int argc, char *argv[])
 {
-    
+    printf("Basic functions - skip the examples please...");
     return 0;
 }
