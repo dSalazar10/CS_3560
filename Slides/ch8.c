@@ -28,6 +28,12 @@ pid_t Fork(void)
      can each execute different sections of the code at the same time (servers).
      2) when a process wants to execute a different program (shells). In this
      situation, it is more efficient to use the vfork() function.
+     
+     The kernel does the following:
+     1) allocates a new chunk of memory and kernel data structures
+     2) copies original process into the new one (c) adds the new process to 
+        the set of running processes
+     3) returns control back to both processes
      */
     pid_t results;
     if((results = fork()) == -1)
