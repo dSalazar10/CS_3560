@@ -31,9 +31,9 @@ pid_t Fork(void)
      
      The kernel does the following:
      1) allocates a new chunk of memory and kernel data structures
-     2) copies original process into the new one (c) adds the new process to 
-        the set of running processes
-     3) returns control back to both processes
+     2) copies original process into the new one
+     3) adds the new process to the set of running processes
+     4) returns control back to both processes
      */
     pid_t results;
     if((results = fork()) == -1)
