@@ -75,7 +75,11 @@ pid_t Wait(int *stat_loc)
 {
     /*
      if stat_loc is not a NULL pointer, the termination
-     status of the terminated process is stored in it
+     status of the terminated process is stored in it.
+     
+     wait does two things:
+     1) it pauses the calling process until the child process finishes.
+     2) it retrieves the value the child process passed to exit.
      */
     pid_t results;
     if((results = wait(stat_loc)) == -1)
